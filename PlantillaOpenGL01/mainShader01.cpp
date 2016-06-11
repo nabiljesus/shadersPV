@@ -1,4 +1,11 @@
-﻿// Cubica
+﻿// Nabil J. Márquez   -  11-10683
+// Marisela del Valle -  11-
+// Proyecto V - Computacion Grafica I
+// Profesor: Eduardo Roa
+// Ultima modificacion:  11/06/16
+
+
+// Cubica
 
 #include <stdlib.h>
 #include <conio.h>
@@ -35,9 +42,15 @@ unsigned char* imageflat3 = NULL;
 unsigned char* imageflat4 = NULL;
 unsigned char* imageflat5 = NULL;
 
-// Luces
-float amb, fill1, fill2, bunny;
-float BunnyColors[4], BColors1[4], BColors2[4];
+// Lights and colors
+GLfloat amb, fill1, fill2, bunny;
+float cAmb[4] = {1.0, 1.0, 1.0, 1.0};
+float cFill1[4] = {1.0, 1.0, 1.0, 1.0};
+float cFill2[4] = {1.0, 1.0, 1.0, 1.0};
+float cFloor[4] = {1.0, 1.0, 1.0, 1.0};
+float cBunny[4] = {1.0, 1.0, 1.0, 1.0};
+// Bilinial filter
+bool billOn = false;
 
 int iheight, iwidth;
 
@@ -99,13 +112,240 @@ void changeViewport(int w, int h) {
 
 }
 
+void Keyboard(unsigned char key, int x, int y)
+{
+  bool shallIPrint = true;
+  switch (key)
+  {
+	default:
+		shallIPrint = false;
+		break;
+
+	// 1: incrementa la intensidad de la luz ambiental en 0.05 (baked_flat)
+	case '1':
+		amb += 0.05;
+		break;
+
+	// 2: reduce la intensidad de la luz ambiental en 0.05 (baked_flat)
+	case '2':
+		if (amb>= 0)      //Raro el condicional, pero si lo pongo >= 0.05 se estanca en 0.05 y nunca llega a cero.
+			amb -= 0.05;
+		break;
+
+	// q: incrementa la intensidad de la luz fill01 en 0.05 (baked_fill01)
+	case 'Q':
+	case 'q':
+		fill1 += 0.05;
+		break;
+
+	// w: reduce la intensidad de la luz fill01 en 0.05 (baked_fill01)
+	case 'W':
+	case 'w':
+		if (fill1>= 0)
+			fill1 -= 0.05;
+		break;
+
+	// a: incrementa la intensidad de la luz fill02 en 0.05 (baked_fill01)
+	case 'A': 
+	case 'a': 
+		fill2 += 0.05;
+		break;
+
+	// s: reduce la intensidad de la luz fill02 en 0.05 (baked_fill01)
+	case 'S':
+	case 's':
+		if (fill2>= 0)
+			fill2 -= 0.05;
+		break;
+
+	// z: incrementa la intensidad de la luz central del conejo en 0.05 (baked_keyrabbit)
+	case 'Z':
+	case 'z':
+		bunny += 0.05;
+		break;
+
+	// x: reduce la intensidad de la luz central del conejo en 0.05 (baked_keyrabbit)
+	case 'X':
+	case 'x':
+		if (bunny>= 0)
+			bunny -= 0.05;
+		break;
+
+	// e: incremente R de RGB en 0.05 del color en la luz fill01
+	case 'E':
+	case 'e':
+		cFill1[0] += 0.05;
+		break;
+
+	// r: incremente G de RGB en 0.05 del color en la luz fill01
+	case 'R':
+	case 'r':
+		cFill1[1] += 0.05;
+		break;
+
+	// t: incremente B de RGB en 0.05 del color en la luz fill01
+	case 'T':
+	case 't':
+		cFill1[2] += 0.05;
+		break;
+
+	// y: reduce R de RGB en 0.05 del color en la luz fill01
+	case 'Y':
+	case 'y':
+		if (cFill1[0]>= 0)
+			cFill1[0] -= 0.05;
+		break;
+
+	// u: reduce G de RGB en 0.05 del color en la luz fill01
+	case 'U':
+	case 'u':
+		if (cFill1[1]>= 0)
+			cFill1[1] -= 0.05;
+		break;
+
+	// i: reduce B de RGB en 0.05 del color en la luz fill01
+	case 'I':
+	case 'i':
+		if (cFill1[2] >= 0)
+			cFill1[2] -= 0.05;
+		break;
+
+	// d: incremente R de RGB en 0.05 del color en la luz fill02
+	case 'D':
+	case 'd':
+		cFill2[0] += 0.05;
+		break;
+
+	// f: incremente G de RGB en 0.05 del color en la luz fill02
+	case 'F':
+	case 'f':
+		cFill2[1] += 0.05;
+		break;
+
+	// g: incremente B de RGB en 0.05 del color en la luz fill02
+	case 'G':
+	case 'g':
+		cFill2[2] += 0.05;
+		break;
+
+	// h: reduce R de RGB en 0.05 del color en la luz fill02
+	case 'H':
+	case 'h':
+		if (cFill2[0]>= 0)
+			cFill2[0] -= 0.05;
+		break;
+
+	// j: reduce G de RGB en 0.05 del color en la luz fill02
+	case 'J':
+	case 'j':
+		if (cFill2[1]>= 0)
+			cFill2[1] -= 0.05;
+		break;
+  
+	// k: reduce B de RGB en 0.05 del color en la luz fill02
+	case 'K':
+	case 'k':
+		if (cFill2[2]>= 0)
+			cFill2[2] -= 0.05;
+		break;
+
+	// c: incremente R de RGB en 0.05 del color en la luz central conejo
+	case 'C':
+	case 'c':
+		cBunny[0] += 0.05;
+		break;
+
+	// v: incremente G de RGB en 0.05 del color en la luz central conejo
+	case 'V':
+	case 'v':
+		cBunny[1] += 0.05;
+		break;
+
+	// b: incremente B de RGB en 0.05 del color en la luz central conejo
+	case 'B':
+	case 'b':
+		cBunny[2] += 0.05;
+		break;
+
+	// n: reduce R de RGB en 0.05 del color en la luz central conejo
+	case 'N':
+	case 'n':
+		if (cBunny[0]>= 0)
+			cBunny[0] -= 0.05;
+		break;
+
+	// m: reduce G de RGB en 0.05 del color en la luz central conejo
+	case 'M':
+	case 'm':
+		if (cBunny[1]>= 0)
+			cBunny[1] -= 0.05;
+		break;
+
+	// ,: reduce B de RGB en 0.05 del color en la luz central conejo
+	case ',':
+		if (cBunny[2]>= 0)
+			cBunny[2] -= 0.05;
+		break;
+
+	// o: activa el filtro bilineal
+	case 'O':
+	case 'o':
+		billOn=true;
+		break;
+
+	// p: desactiva el filtro bilineal
+	case 'P':
+	case 'p':
+		billOn=false;
+		break;
+
+	// 1er color piso
+	case '3':
+		cFloor[0] = 1.0;
+		cFloor[1] = 1.0;
+		cFloor[2] = 0.5;
+		cFloor[3] = 1.0;
+		break;
+
+	// 2do color piso
+	case '4':
+		cFloor[0] = 0.3;
+		cFloor[1] = 0.3;
+		cFloor[2] = 0.3;
+		cFloor[3] = 1.0;
+		break;
+
+	// 3er color piso
+	case '5':
+		cFloor[0] = 0.5;
+		cFloor[1] = 0.0;
+		cFloor[2] = 1.0;
+		cFloor[3] = 1.0;
+		break;
+
+	// 4to color piso
+	case '6':
+		cFloor[0] = 1.0;
+		cFloor[1] = 0.0;
+		cFloor[2] = 0.0;
+		cFloor[3] = 1.0;
+		break;
+  }
+  if (shallIPrint){
+	printf("...I just press: %c\n",key);
+  }
+  cBunny[3]=1.0f;
+  cBunny[3]=1.0f;
+  glutPostRedisplay();
+}
+
+
 void init(){
 	
    glEnable(GL_LIGHTING);
    glEnable(GL_LIGHT0);
    glEnable(GL_DEPTH_TEST);
    
-   // Cargando Textura
    glGenTextures(1, &texflat);
    glBindTexture(GL_TEXTURE_2D, texflat);
 
@@ -125,7 +365,7 @@ void init(){
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-   imageflat2 = glmReadPPM("baked_keyrabbit.ppm", &iwidth, &iheight); // bunny
+   imageflat2 = glmReadPPM("baked_keyrabbit.ppm", &iwidth, &iheight); // Conejo
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iwidth, iheight, 0, GL_RGB, GL_UNSIGNED_BYTE, imageflat2);
 
    glGenTextures(1, &texflat3);
@@ -164,238 +404,16 @@ void init(){
    shader = SM.loadfromFile("texture.vert","texture.frag"); // load (and compile, link) from file
   		  if (shader==0) 
 			  std::cout << "Error Loading, compiling or linking shader\n";
-
-	amb = 0.0;
-	bunny = 1.0;
-	fill1 = 1.0;
-	fill2 = 1.0;
-
+	amb = 1.0f;
+	bunny = 1.0f;
+	fill1 = 0.0;
+	fill2 = 0.0;
 	for(int i = 0; i < 4; i++) {
-		BColors1[i] = 1.0;
+		cFill1[i] = 1.0;
+		cFill2[i] = 1.0;
+		cBunny[i] = 1.0;
+		cAmb[i] = 1.0;
 	}
-	for(int i = 0; i < 4; i++) {
-		BColors2[i] = 1.0;
-	}	
-	for(int i = 0; i < 4; i++) {
-		BunnyColors[i] = 1.0;
-	}
-}
-
-void Keyboard(unsigned char key, int x, int y)
-{
-
-  switch (key)
-  {
-	default:
-		break;
-
-	// 1: incrementa la intensidad de la luz ambiental en 0.05 (baked_flat)
-	case '1':
-		if (amb < 1.0)
-			amb += 0.05;
-		break;
-
-	// 2: reduce la intensidad de la luz ambiental en 0.05 (baked_flat)
-	case '2':
-		if (amb > 0.0)
-			amb -= 0.05;
-		break;
-
-	// q: incrementa la intensidad de la luz fill01 en 0.05 (baked_fill01)
-	case 'Q':
-	case 'q':
-		if (fill1 < 1.0)
-			fill1 += 0.05;
-		break;
-
-	// w: reduce la intensidad de la luz fill01 en 0.05 (baked_fill01)
-	case 'W':
-	case 'w':
-		if (fill1 > 0.0)
-			fill1 -= 0.05;
-		break;
-
-	// a: incrementa la intensidad de la luz fill02 en 0.05 (baked_fill01)
-	case 'A': 
-	case 'a': 
-		if (fill2 < 1.0)
-			fill2 += 0.05;
-		break;
-
-	// s: reduce la intensidad de la luz fill02 en 0.05 (baked_fill01)
-	case 'S':
-	case 's':
-		if (fill2 > 0.0)
-			fill2 -= 0.05;
-		break;
-
-	// z: incrementa la intensidad de la luz central del bunny en 0.05 (baked_keyrabbit)
-	case 'Z':
-	case 'z':
-		if (bunny < 1.0)
-			bunny += 0.05;
-		break;
-
-	// x: reduce la intensidad de la luz central del bunny en 0.05 (baked_keyrabbit)
-	case 'X':
-	case 'x':
-		if (bunny > 0.0)
-			bunny -= 0.05;
-		break;
-
-	// e: incremente R de RGB en 0.05 del color en la luz fill01
-	case 'E':
-	case 'e':
-		if (BColors1[0] < 1.0)
-			BColors1[0] += 0.05;
-		break;
-
-	// r: incremente G de RGB en 0.05 del color en la luz fill01
-	case 'R':
-	case 'r':
-		if (BColors1[1] < 1.0)
-			BColors1[1] += 0.05;
-		break;
-
-	// t: incremente B de RGB en 0.05 del color en la luz fill01
-	case 'T':
-	case 't':
-		if (BColors1[2] < 1.0)
-			BColors1[2] += 0.05;
-		break;
-
-	// y: reduce R de RGB en 0.05 del color en la luz fill01
-	case 'Y':
-	case 'y':
-		if (BColors1[0] > 0.0)
-			BColors1[0] -= 0.05;
-		break;
-
-	// u: reduce G de RGB en 0.05 del color en la luz fill01
-	case 'U':
-	case 'u':
-		if (BColors1[1] > 0.0)
-			BColors1[1] -= 0.05;
-		break;
-
-	// i: reduce B de RGB en 0.05 del color en la luz fill01
-	case 'I':
-	case 'i':
-		if (BColors1[2] > 0.0)
-			BColors1[2] -= 0.05;
-		break;
-
-	// d: incremente R de RGB en 0.05 del color en la luz fill02
-	case 'D':
-	case 'd':
-		if (BColors2[0] < 1.0)
-			BColors2[0] += 0.05;
-		break;
-
-	// f: incremente G de RGB en 0.05 del color en la luz fill02
-	case 'F':
-	case 'f':
-		if (BColors2[1] < 1.0)
-			BColors2[1] += 0.05;
-		break;
-
-	// g: incremente B de RGB en 0.05 del color en la luz fill02
-	case 'G':
-	case 'g':
-		if (BColors2[2] < 1.0)
-			BColors2[2] += 0.05;
-		break;
-
-	// h: reduce R de RGB en 0.05 del color en la luz fill02
-	case 'H':
-	case 'h':
-		if (BColors2[0] > 0.0)
-			BColors2[0] -= 0.05;
-		break;
-
-	// j: reduce G de RGB en 0.05 del color en la luz fill02
-	case 'J':
-	case 'j':
-		if (BColors2[1] > 0.0)
-			BColors2[1] -= 0.05;
-		break;
-  
-	// k: reduce B de RGB en 0.05 del color en la luz fill02
-	case 'K':
-	case 'k':
-		if (BColors2[2] > 0.0)
-			BColors2[2] -= 0.05;
-		break;
-
-	// c: incremente R de RGB en 0.05 del color en la luz central del bunny
-	case 'C':
-	case 'c':
-		if (BunnyColors[0] < 1.0)
-			BunnyColors[0] += 0.05;
-		break;
-
-	// v: incremente G de RGB en 0.05 del color en la luz central del bunny
-	case 'V':
-	case 'v':
-		if (BunnyColors[1] < 1.0)
-			BunnyColors[1] += 0.05;
-		break;
-
-	// b: incremente B de RGB en 0.05 del color en la luz central del bunny
-	case 'B':
-	case 'b':
-		if (BunnyColors[2] < 1.0)
-			BunnyColors[2] += 0.05;
-		break;
-
-	// n: reduce R de RGB en 0.05 del color en la luz central del bunny
-	case 'N':
-	case 'n':
-		if (BunnyColors[0] > 0.0)
-			BunnyColors[0] -= 0.05;
-		break;
-
-	// m: reduce G de RGB en 0.05 del color en la luz central del bunny
-	case 'M':
-	case 'm':
-		if (BunnyColors[1] > 0.0)
-			BunnyColors[1] -= 0.05;
-		break;
-
-	// ,: reduce B de RGB en 0.05 del color en la luz central del bunny
-	case ',':
-		if (BunnyColors[2] > 0.0)
-			BunnyColors[2] -= 0.05;
-		break;
-
-	// o: activa el filtro bilineal
-	case 'O':
-	case 'o':
-		break;
-
-	// p: desactiva el filtro bilineal
-	case 'P':
-	case 'p':
-		break;
-
-	// 1er color piso
-	case '3':
-		break;
-
-	// 2do color piso
-	case '4':
-		break;
-
-	// 3er color piso
-	case '5':
-		break;
-
-	// 4to color piso
-	case '6':
-		break;
-  }
-
-  glutPostRedisplay();
 }
 
 void recursive_render (const aiScene *sc, const aiNode* myNode)
@@ -476,9 +494,12 @@ void render(){
 	shader->setUniform1f("_bunny", bunny);
 	shader->setUniform1f("_fill1", fill1);
 	shader->setUniform1f("_fill2", fill2);
-	shader->setUniform4f("BColors1", BColors1[0], BColors1[1], BColors1[2], BColors1[3]);
-	shader->setUniform4f("BColors2", BColors2[0], BColors2[1], BColors2[2], BColors2[3]);
-	shader->setUniform4f("BunnyColors", BunnyColors[0], BunnyColors[1], BunnyColors[2], BunnyColors[3]);
+	shader->setUniform1f("billOn", billOn);
+	shader->setUniform4f("cFill1", cFill1[0], cFill1[1], cFill1[2], cFill1[3]);
+	shader->setUniform4f("cFill2", cFill2[0], cFill2[1], cFill2[2], cFill2[3]);
+	shader->setUniform4f("cBunny", cBunny[0], cBunny[1], cBunny[2], cBunny[3]);
+	shader->setUniform4f("cAmb", cAmb[0], cAmb[1], cAmb[2], cAmb[3]);
+	shader->setUniform4f("cFloor", cFloor[0], cFloor[1], cFloor[2], cFloor[3]);
 
 	shader->setTexture("stexflat", texflat, 0);
 	shader->setTexture("stexflat2", texflat2, 1);
