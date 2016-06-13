@@ -4,6 +4,7 @@
 // Profesor: Eduardo Roa
 // Ultima modificacion:  11/06/16
 
+// Inicializamos variables
 #define textureWidth 4096.0
 #define textureHeight 4096.0	
 #define texel_size_x 1.0 / textureWidth
@@ -14,6 +15,7 @@ uniform float _amb, _bunny, _fill1, _fill2;
 uniform vec4 cFill1, cFill2, cBunny, cFloor, cAmb;
 uniform bool billOn;
 
+// Funcion para filtro bilinear
 vec4 texture2D_bilinear( sampler2D tex, vec2 uv ) {
 	vec2 f;
 
@@ -34,7 +36,7 @@ vec4 texture2D_bilinear( sampler2D tex, vec2 uv ) {
 void main(void) {
 
 	vec4 wholePaint, cAUX, cAUX2, cAUX3, cAUX4, cAUX5, amb, bunny, fill1, fill2, floor; 
-	
+	// Verificamos condicion para ver si se activa el filtro o no
 	if (billOn) {
 		cAUX = texture2D_bilinear(stexflat,gl_TexCoord[0].st);
 		cAUX2 = texture2D_bilinear(stexflat2,gl_TexCoord[0].st);
@@ -50,7 +52,7 @@ void main(void) {
 		cAUX4 = texture2D(stexflat4,gl_TexCoord[0].st);
 		cAUX5 = texture2D(stexflat5,gl_TexCoord[0].st);
 	}
-
+	// Valores correspondientes para el piso, ambiente, conejo y arboles
 	floor = mix(cAUX,cFloor,cAUX5);
 	amb = cAmb*_amb;
 	bunny = cBunny*cAUX2*_bunny;
