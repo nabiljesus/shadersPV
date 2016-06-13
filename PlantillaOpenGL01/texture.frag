@@ -1,3 +1,9 @@
+// Nabil J. Márquez   -  11-10683
+// Marisela del Valle -  11-10267
+// Proyecto V - Computacion Grafica I
+// Profesor: Eduardo Roa
+// Ultima modificacion:  11/06/16
+
 #define textureWidth 4096.0
 #define textureHeight 4096.0	
 #define texel_size_x 1.0 / textureWidth

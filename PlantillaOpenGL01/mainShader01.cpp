@@ -1,5 +1,5 @@
 ﻿// Nabil J. Márquez   -  11-10683
-// Marisela del Valle -  11-
+// Marisela del Valle -  11-10267
 // Proyecto V - Computacion Grafica I
 // Profesor: Eduardo Roa
 // Ultima modificacion:  11/06/16
@@ -346,6 +346,7 @@ void init(){
    glEnable(GL_LIGHT0);
    glEnable(GL_DEPTH_TEST);
    
+   //Seteamos las texturas para los distintos objetos
    glGenTextures(1, &texflat);
    glBindTexture(GL_TEXTURE_2D, texflat);
 
@@ -354,7 +355,8 @@ void init(){
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-   imageflat = glmReadPPM("baked_flat.ppm", &iwidth, &iheight); // Ambiental
+   // Textura ambiental
+   imageflat = glmReadPPM("baked_flat.ppm", &iwidth, &iheight); 
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iwidth, iheight, 0, GL_RGB, GL_UNSIGNED_BYTE, imageflat);
 
    glGenTextures(1, &texflat2);
@@ -365,7 +367,8 @@ void init(){
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-   imageflat2 = glmReadPPM("baked_keyrabbit.ppm", &iwidth, &iheight); // Conejo
+   // Textura para el conejo
+   imageflat2 = glmReadPPM("baked_keyrabbit.ppm", &iwidth, &iheight);
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iwidth, iheight, 0, GL_RGB, GL_UNSIGNED_BYTE, imageflat2);
 
    glGenTextures(1, &texflat3);
@@ -376,7 +379,8 @@ void init(){
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-   imageflat3 = glmReadPPM("baked_fill01.ppm", &iwidth, &iheight); // Relleno 01
+   // Texturas de relleno
+   imageflat3 = glmReadPPM("baked_fill01.ppm", &iwidth, &iheight);
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iwidth, iheight, 0, GL_RGB, GL_UNSIGNED_BYTE, imageflat3);
 
    glGenTextures(1, &texflat4);
@@ -387,7 +391,7 @@ void init(){
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-   imageflat4 = glmReadPPM("baked_fill02.ppm", &iwidth, &iheight); // Relleno 02
+   imageflat4 = glmReadPPM("baked_fill02.ppm", &iwidth, &iheight); 
    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iwidth, iheight, 0, GL_RGB, GL_UNSIGNED_BYTE, imageflat4);
 
    glGenTextures(1, &texflat5);
@@ -487,9 +491,9 @@ void render(){
 	glEnable( GL_LINE_SMOOTH );	
 
 	glPushMatrix();
-
+	// Iniciamos los shaders
 	if (shader) shader->begin();
-
+	// Pasamos las variables inicializadas al shader
 	shader->setUniform1f("_amb", amb);
 	shader->setUniform1f("_bunny", bunny);
 	shader->setUniform1f("_fill1", fill1);
@@ -500,7 +504,7 @@ void render(){
 	shader->setUniform4f("cBunny", cBunny[0], cBunny[1], cBunny[2], cBunny[3]);
 	shader->setUniform4f("cAmb", cAmb[0], cAmb[1], cAmb[2], cAmb[3]);
 	shader->setUniform4f("cFloor", cFloor[0], cFloor[1], cFloor[2], cFloor[3]);
-
+	// Seteamos las texturas al shader
 	shader->setTexture("stexflat", texflat, 0);
 	shader->setTexture("stexflat2", texflat2, 1);
 	shader->setTexture("stexflat3", texflat3, 2);
